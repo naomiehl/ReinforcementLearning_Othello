@@ -146,4 +146,4 @@ class OthelloEnv(gym.Env):
     
     def render(self):
         
-        return '\n'.join([' '.join([ASCII.getsymbol(value) for value in row]) for row in self.board])
+        return '\n'.join([''.join([ASCII.getsymbol(value) for value in row]) for row in self.board])
