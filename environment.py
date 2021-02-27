@@ -153,4 +153,4 @@ class OthelloEnv(gym.Env):
         return x * self.n + y
     
     def ind2coord(self, ind):
-        return [ind // self.n, ind % self.n]
+        return (ind // self.n, ind % self.n)
