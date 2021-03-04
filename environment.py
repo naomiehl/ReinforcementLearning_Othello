@@ -24,6 +24,7 @@ class OthelloEnv(gym.Env):
     def __init__(self, n=8):
         
         self.done = False
+        self.turn_passed = False # True when a player passes turn because no valid moves
         self.observation_space = spaces.Box(low = -1, high = 1, shape = (n, n), dtype = int)
         self.action_space = spaces.Discrete(n*n)
         self.n = n
@@ -38,6 +39,7 @@ class OthelloEnv(gym.Env):
         self.turn = WHITE
         self.get_valid_moves(self.turn)
         self.done = False
+        self.turn_passed = False
         
         return self.board
         
@@ -51,10 +53,15 @@ class OthelloEnv(gym.Env):
         
         # Calculate the reward for the new state
         score = self.score()
-        self.done = score is not None
+        self.done = (score is not None) and self.turn_passed
+        self.turn_passed = score is not None
         self.reward = score if self.done else 0
         
         self.turn *= -1
+        
+        if self.turn_passed:
+            self.turn *= -1
+            self.get_valid_moves(self.turn)
         
         return self.board, self.reward, self.done, {'turn': self.turn}
     
@@ -62,7 +69,11 @@ class OthelloEnv(gym.Env):
         
         white, black, empty = self.do_count()
 
-        if white == 0 or black == 0 or empty == 0 or len(self.valid_moves) == 0:
+        if empty == 0:
+            self.turn_passed = True
+            return (white - black) / self.n**2
+
+        if white == 0 or black == 0 or len(self.valid_moves) == 0:
             return (white - black) / self.n**2
         
         return None
