@@ -61,7 +61,6 @@ class OthelloEnv(gym.Env):
         if self.turn_passed:
             self.turn *= -1
             self.valid_moves = self.get_valid_moves(self.turn)
-            if len(self.valid_moves) == 0:
             self.done = len(self.valid_moves) == 0
         
         return self.board, self.reward, self.done, {'turn': self.turn}
