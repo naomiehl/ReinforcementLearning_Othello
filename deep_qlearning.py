@@ -263,17 +263,18 @@ def train_one_episode(env, game, color, device=device, batch_size=BATCH_SIZE, ga
             new_state = opp_state
         else:
             # Opponent plays
-            opp_action, _ = game.get_agent(env.turn).draw_action(env, opp_state, epsilon)
-            if opp_action is not None:
-                new_state, reward, done, info = env.step(opp_action)
-                new_state = state_numpy_to_tensor(new_state)
+            while env.turn != color and not done:
+                opp_action, _ = game.get_agent(env.turn).draw_action(env, opp_state, epsilon)
+                if opp_action is not None:
+                    new_state, reward, done, info = env.step(opp_action)
+                    new_state = state_numpy_to_tensor(new_state)
 
-                if reward * color > 0:
-                    reward = 1.
-                elif reward * color < 0:
-                    reward = -1.
-            else:
-                raise ValueError("No valid move!")
+                    if reward * color > 0:
+                        reward = 1.
+                    elif reward * color < 0:
+                        reward = -1.
+                else:
+                    raise ValueError("No valid move!")
 
         reward = torch.tensor([reward], device=device, dtype=torch.float)
         # Push the transition into player color's replay buffer
