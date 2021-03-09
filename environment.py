@@ -157,3 +157,10 @@ class OthelloEnv(gym.Env):
     def render(self):
         
         return '\n'.join([''.join([ASCII.getsymbol(value) for value in row]) for row in self.board])
+      
+    def coord2ind(self, coord):
+        x, y = coord
+        return x * self.n + y
+
+    def ind2coord(self, ind):
+        return (ind // self.n, ind % self.n)
