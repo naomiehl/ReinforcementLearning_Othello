@@ -56,7 +56,8 @@ class DQN(nn.Module):
             nn.Linear(n*n*16, n*n),
             nn.LeakyReLU(),
             nn.BatchNorm1d(n*n),
-            nn.Linear(n*n, n*n)
+            nn.Linear(n*n, n*n),
+            nn.Softmax(1)
         )
 
     def forward(self, states):
@@ -95,8 +96,10 @@ class DQNAgent:
         if len(valid_moves) > 0:
             if np.random.rand() <= 1 - epsilon:
                 valid_moves_ind = [env.coord2ind(p) for p in valid_moves]
-                action = valid_moves[torch.argmax(values[valid_moves_ind])]
-                return action, values[env.coord2ind(action)]
+                probs = values[valid_moves_ind] + 1e-8
+                probs /= probs.sum()
+                action = np.random.choice(valid_moves_ind, p=probs.cpu().numpy())
+                return env.ind2coord(action), values[action]
             else:
                 action = valid_moves[np.random.randint(0, len(valid_moves))]
                 return action , values[env.coord2ind(action)]
