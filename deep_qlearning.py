@@ -28,7 +28,7 @@ EPS_DECAY = 400
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
 GAMMA = 0.99
-LR = 0.1
+LR = 0.01
 N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 
@@ -341,7 +341,7 @@ game.sync(1, -1)
 
 color = 1
 nb_episodes_per_agent = 1
-target_update = 10
+target_update = 20
 print_step = 500
 
 for i in tqdm(range(200001)):
