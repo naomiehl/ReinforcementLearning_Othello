@@ -31,6 +31,7 @@ GAMMA = 0.99
 LR = 0.01
 N_CHANNELS = 3
 MINIMAX_DEPTH = 3
+PATH = "dqn_state_dict.pt"
 
 class DQN(nn.Module):
     def __init__(self, n=8, n_channels=N_CHANNELS):
@@ -366,4 +367,6 @@ for i in tqdm(range(200001)):
         print("White ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(i, num_success, max_cons_success, score))
         num_success, max_cons_success, score, _ = score_multi_episode(env, game, -1)
         print("Black ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(i, num_success, max_cons_success, score))
+        torch.save(game.get_agent(color).q_model.state_dict(), PATH)
+        print("S")
 
