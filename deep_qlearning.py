@@ -32,6 +32,9 @@ LR = 0.01
 N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
+nb_episodes_per_agent = 1
+target_update = 20
+print_step = 1000
 
 class DQN(nn.Module):
     def __init__(self, n=8, n_channels=N_CHANNELS):
@@ -342,9 +345,6 @@ game = OthelloGame(DQNAgent(env, 1, lr=LR), DQNAgent(env, -1, lr=LR))
 game.sync(1, -1)
 
 color = 1
-nb_episodes_per_agent = 1
-target_update = 20
-print_step = 500
 
 for i in tqdm(range(200001)):
     train_one_episode(env, game, color)
