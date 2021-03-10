@@ -34,7 +34,7 @@ N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
-TARGET_UPDATE = 100
+TARGET_UPDATE = 300
 PRINT_STEP = 1000
 
 
@@ -87,7 +87,7 @@ class DQNAgent:
         self.target_model = DQN(env.n, n_channels).to(device)
         self.update_target_model()
         self.target_model.eval()
-        self.optimizer = torch.optim.Adam(self.q_model.parameters(), lr=lr)
+        self.optimizer = torch.optim.RMSprop(self.q_model.parameters(), lr=lr)
         self.buffer = ReplayBuffer(10000)
         self.color = color
         self.steps_done = 0
