@@ -391,7 +391,7 @@ def score_multi_episode(env, game, color, depth=MINIMAX_DEPTH, device=device,
     return num_success, max(num_cons_success), score, results
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     np.random.seed(0)
     torch.manual_seed(0)
     random.seed(0)
