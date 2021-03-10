@@ -61,8 +61,7 @@ class DQN(nn.Module):
             nn.Linear(n*n*4, n*n*2),
             nn.LeakyReLU(),
             nn.BatchNorm1d(n*n*2),
-            nn.Linear(n*n*2, n*n),
-            nn.Softmax(1)
+            nn.Linear(n*n*2, n*n)
         )
 
     def forward(self, states):
@@ -108,8 +107,8 @@ class DQNAgent:
         if len(valid_moves) > 0:
             if np.random.rand() <= 1 - epsilon:
                 valid_moves_ind = [env.coord2ind(p) for p in valid_moves]
-                probs = values[valid_moves_ind] + 1e-8
-                probs /= probs.sum()
+                probs = values[valid_moves_ind]
+                probs = F.softmax(probs, dim=0)
                 action = np.random.choice(
                     valid_moves_ind, p=probs.cpu().numpy())
                 return env.ind2coord(action), values[action]
