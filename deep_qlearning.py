@@ -24,8 +24,8 @@ env.reset()
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 100000
+EPS_END = 0.1
+EPS_DECAY = 3*1e6
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
 GAMMA = 0.99
@@ -94,12 +94,11 @@ class DQNAgent:
 
     def draw_action(self, env, s, epsilon=None):
         """Draw an action based on state s and DQN."""
-        self.steps_done += 1
-        if epsilon is None:
-            epsilon = EPS_END + (EPS_START - EPS_END) * \
-                np.exp(-1. * self.steps_done / EPS_DECAY)
 
         s *= self.color
+        if epsilon is None:
+            epsilon = EPS_START + (EPS_START - EPS_END) / \
+                EPS_DECAY * self.steps_done
 
         with torch.no_grad():
             values = self.q_model(s).reshape(-1)
@@ -269,6 +268,7 @@ def optimize_model(agent, batch_size=BATCH_SIZE, device=device, gamma=GAMMA):
     for param in agent.q_model.parameters():
         param.grad.data.clamp_(-1, 1)
     agent.optimizer.step()
+    agent.steps_done += 1
     agent.q_model.eval()
 
 
