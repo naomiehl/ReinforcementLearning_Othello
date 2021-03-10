@@ -24,8 +24,8 @@ env.reset()
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 EPS_START = 0.9
-EPS_END = 0.0
-EPS_DECAY = 400
+EPS_END = 0.05
+EPS_DECAY = 100000
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
 GAMMA = 0.99
