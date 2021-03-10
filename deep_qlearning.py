@@ -87,7 +87,7 @@ class DQNAgent:
         self.target_model = DQN(env.n, n_channels).to(device)
         self.update_target_model()
         self.target_model.eval()
-        self.optimizer = torch.optim.RMSprop(self.q_model.parameters(), lr=lr)
+        self.optimizer = torch.optim.Adam(self.q_model.parameters(), lr=lr)
         self.buffer = ReplayBuffer(10000)
         self.color = color
         self.steps_done = 0
