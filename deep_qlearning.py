@@ -34,7 +34,7 @@ N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
-TARGET_UPDATE = 500
+TARGET_UPDATE = 300
 PRINT_STEP = 1000
 
 
@@ -87,7 +87,7 @@ class DQNAgent:
         self.target_model = DQN(env.n, n_channels).to(device)
         self.update_target_model()
         self.target_model.eval()
-        self.optimizer = torch.optim.Adam(self.q_model.parameters(), lr=lr)
+        self.optimizer = torch.optim.RMSprop(self.q_model.parameters(), lr=lr)
         self.buffer = ReplayBuffer(10000)
         self.color = color
         self.steps_done = 0
@@ -255,8 +255,9 @@ def optimize_model(agent, batch_size=BATCH_SIZE, device=device, gamma=GAMMA):
     state_action_values = agent.q_model(state_batch).gather(1, action_batch)
 
     next_state_values = torch.zeros(batch_size, device=device)
+    a_max_of_next_state = agent.q_model(non_final_next_states).argmax(1)
     next_state_values[non_final_mask] = agent.target_model(
-        non_final_next_states).max(1)[0].detach()
+        non_final_next_states)[:, a_max_of_next_state].detach()
 
     expected_state_action_values = next_state_values * gamma + reward_batch
 
