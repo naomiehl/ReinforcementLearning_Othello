@@ -256,6 +256,7 @@ def optimize_model(agent, batch_size=BATCH_SIZE, device=device, gamma=GAMMA):
 
     next_state_values = torch.zeros(batch_size, device=device)
     a_max_of_next_state = agent.q_model(non_final_next_states).argmax(1)
+    print(a_max_of_next_state.shape)
     next_state_values[non_final_mask] = agent.target_model(
         non_final_next_states)[:, a_max_of_next_state].detach()
 
