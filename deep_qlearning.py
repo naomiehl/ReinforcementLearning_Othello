@@ -28,13 +28,13 @@ EPS_END = 0.1
 EPS_DECAY = 3*1e6
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
-GAMMA = 0.99
+GAMMA = 1.0
 LR = 0.1
 N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
-TARGET_UPDATE = 300
+TARGET_UPDATE = 10000
 PRINT_STEP = 1000
 
 
@@ -83,14 +83,14 @@ class DQNAgent:
 
     def __init__(self, env, color, device=device, n_channels=3, lr=LR):
         """Initialize."""
+        self.steps_done = 0
         self.q_model = DQN(env.n, n_channels).to(device)
         self.target_model = DQN(env.n, n_channels).to(device)
         self.update_target_model()
         self.target_model.eval()
         self.optimizer = torch.optim.RMSprop(self.q_model.parameters(), lr=lr)
-        self.buffer = ReplayBuffer(10000)
+        self.buffer = ReplayBuffer(100000)
         self.color = color
-        self.steps_done = 0
 
     def draw_action(self, env, s, epsilon=None):
         """Draw an action based on state s and DQN."""
@@ -160,7 +160,8 @@ class DQNAgent:
 
     def update_target_model(self):
         """Copy state_dict of q_model to target_model."""
-        self.target_model.load_state_dict(self.q_model.state_dict())
+        if self.steps_done % TARGET_UPDATE == 0:
+            self.target_model.load_state_dict(self.q_model.state_dict())
 
 
 class RandomAgent:
@@ -275,6 +276,7 @@ def optimize_model(agent, batch_size=BATCH_SIZE, device=device, gamma=GAMMA):
         param.grad.data.clamp_(-1, 1)
     agent.optimizer.step()
     agent.steps_done += 1
+    agent.update_target_model()
     agent.q_model.eval()
 
 
@@ -416,10 +418,6 @@ if __name__ == "__main__":
         if i % NB_EPISODES_PER_AGENT == 0:
             game.sync(color, -color)  # Update model for the other player
             color *= -1
-
-        if i % TARGET_UPDATE == 0:
-            game.get_agent(color).update_target_model()
-            game.get_agent(-color).update_target_model()
 
         if i % PRINT_STEP == 0:
             print("Scoring...")
