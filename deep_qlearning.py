@@ -49,11 +49,11 @@ class DQN(nn.Module):
             nn.Conv2d(n_channels, 4, 3, stride=1, padding=1),
             nn.LeakyReLU(),
             # nn.BatchNorm2d(4),
-            # nn.Conv2d(4, 8, 3, stride=1, padding=1),
-            # nn.LeakyReLU(),
+            nn.Conv2d(4, 16, 3, stride=1, padding=1),
+            nn.LeakyReLU(),
             # nn.BatchNorm2d(8),
-            # nn.Conv2d(8, 16, 3, stride=1, padding=1),
-            # nn.LeakyReLU(),
+            nn.Conv2d(8, 32, 3, stride=1, padding=1),
+            nn.LeakyReLU(),
             # nn.BatchNorm2d(16),
         )
 
