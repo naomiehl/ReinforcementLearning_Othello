@@ -46,22 +46,22 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
         self.n_channels = n_channels
         self.convo = nn.Sequential(
-            nn.Conv2d(n_channels, 4, 3, stride=1, padding=1),
+            nn.Conv2d(n_channels, 512, 3, stride=1, padding=1),
             nn.LeakyReLU(),
             # nn.BatchNorm2d(4),
-            nn.Conv2d(4, 16, 3, stride=1, padding=1),
+            nn.Conv2d(512, 512, 3, stride=1, padding=1),
             nn.LeakyReLU(),
             # nn.BatchNorm2d(8),
-            nn.Conv2d(8, 32, 3, stride=1, padding=1),
+            nn.Conv2d(512, 512, 3, stride=1, padding=1),
             nn.LeakyReLU(),
             # nn.BatchNorm2d(16),
         )
 
         self.head = nn.Sequential(
-            nn.Linear(n*n*4, n*n*2),
+            nn.Linear(n*n*512, n*n*16),
             nn.LeakyReLU(),
             # nn.BatchNorm1d(n*n*2),
-            nn.Linear(n*n*2, n*n)
+            nn.Linear(n*n*16, n*n)
         )
 
     def forward(self, states):
