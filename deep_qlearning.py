@@ -25,7 +25,7 @@ device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
 EPS_START = 0.9
 EPS_END = 0.1
-EPS_DECAY = 3*1e6
+EPS_DECAY = 1e7
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
 GAMMA = 1.0
@@ -34,7 +34,7 @@ N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
-TARGET_UPDATE = 10000
+TARGET_UPDATE = 20000
 PRINT_STEP = 1000
 
 
@@ -49,16 +49,16 @@ class DQN(nn.Module):
             nn.Conv2d(n_channels, 64, 3, stride=1, padding=1),
             nn.LeakyReLU(),
             # nn.BatchNorm2d(4),
-            nn.Conv2d(64, 128, 3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            # nn.Conv2d(64, 128, 3, stride=1, padding=1),
+            # nn.LeakyReLU(),
             # nn.BatchNorm2d(8),
-            nn.Conv2d(128, 128, 3, stride=1, padding=1),
-            nn.LeakyReLU(),
+            # nn.Conv2d(128, 128, 3, stride=1, padding=1),
+            # nn.LeakyReLU(),
             # nn.BatchNorm2d(16),
         )
 
         self.head = nn.Sequential(
-            nn.Linear(n*n*128, n*n*16),
+            nn.Linear(n*n*64, n*n*16),
             nn.LeakyReLU(),
             # nn.BatchNorm1d(n*n*2),
             nn.Linear(n*n*16, n*n)
@@ -99,6 +99,7 @@ class DQNAgent:
         if epsilon is None:
             epsilon = EPS_START + (EPS_START - EPS_END) / \
                 EPS_DECAY * self.steps_done
+            epsilon = max(epsilon, EPS_END)
 
         with torch.no_grad():
             values = self.q_model(s).reshape(-1)
