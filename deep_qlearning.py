@@ -29,12 +29,12 @@ EPS_DECAY = 1e7
 BATCH_SIZE = 128
 NUM_EPISODES_EVAL = 100
 GAMMA = 1.0
-LR = 0.01
+LR = 0.001
 N_CHANNELS = 3
 MINIMAX_DEPTH = 3
 PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
-TARGET_UPDATE = 20000
+TARGET_UPDATE = 10000
 PRINT_STEP = 1000
 
 
@@ -51,7 +51,7 @@ class DQN(nn.Module):
             # nn.BatchNorm2d(4),
             # nn.Conv2d(64, 128, 3, stride=1, padding=1),
             # nn.LeakyReLU(),
-            # nn.BatchNorm2d(8),
+            # # nn.BatchNorm2d(8),
             # nn.Conv2d(128, 128, 3, stride=1, padding=1),
             # nn.LeakyReLU(),
             # nn.BatchNorm2d(16),
