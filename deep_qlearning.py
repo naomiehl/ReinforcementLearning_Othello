@@ -94,7 +94,6 @@ class DQNAgent:
 
     def draw_action(self, env, s, epsilon=None):
         """Draw an action based on state s and DQN."""
-
         s *= self.color
         if epsilon is None:
             epsilon = EPS_START + (EPS_START - EPS_END) / \
