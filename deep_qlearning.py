@@ -426,11 +426,11 @@ if __name__ == "__main__":
             num_success_white, max_cons_success, score, _ = score_multi_episode(
                 env, game, 1)
             print("White ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
-                i, num_success, max_cons_success, score))
+                i, num_success_white, max_cons_success, score))
             num_success_black, max_cons_success, score, _ = score_multi_episode(
                 env, game, -1)
             print("Black ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
-                i, num_success, max_cons_success, score))
+                i, num_success_black, max_cons_success, score))
             writer.add_scalars(
                 'Performance',
                 {'White': num_success_white,
