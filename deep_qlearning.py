@@ -18,7 +18,9 @@ from collections import namedtuple
 from itertools import count
 import random
 from copy import deepcopy
+from torch.utils.tensorboard import SummaryWriter
 
+writer = SummaryWriter()
 env = OthelloEnv(n=8)
 env.reset()
 device = torch.device(
@@ -421,13 +423,20 @@ if __name__ == "__main__":
 
         if i % PRINT_STEP == 0:
             print("Scoring...")
-            num_success, max_cons_success, score, _ = score_multi_episode(
+            num_success_white, max_cons_success, score, _ = score_multi_episode(
                 env, game, 1)
             print("White ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
                 i, num_success, max_cons_success, score))
-            num_success, max_cons_success, score, _ = score_multi_episode(
+            num_success_black, max_cons_success, score, _ = score_multi_episode(
                 env, game, -1)
             print("Black ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
                 i, num_success, max_cons_success, score))
+            writer.add_scalars(
+                'Performance',
+                {'White': num_success_white,
+                 'Black': num_success_black,
+                 'Average': (num_success_black + num_success_white) / 2.0},
+                i)
             torch.save(game.get_agent(color).q_model.state_dict(), PATH)
             print("Model saved")
+    writer.close()
