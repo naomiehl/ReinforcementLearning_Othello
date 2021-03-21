@@ -20,7 +20,7 @@ import random
 from copy import deepcopy
 from torch.utils.tensorboard import SummaryWriter
 
-writer = SummaryWriter()
+writer = SummaryWriter(log_dir='runs_1')
 env = OthelloEnv(n=8)
 env.reset()
 device = torch.device(
@@ -63,7 +63,8 @@ class DQN(nn.Module):
             nn.Linear(n*n*64, n*n*16),
             nn.LeakyReLU(),
             # nn.BatchNorm1d(n*n*2),
-            nn.Linear(n*n*16, n*n)
+            nn.Linear(n*n*16, n*n),
+            nn.Hardtanh()
         )
 
     def forward(self, states):
