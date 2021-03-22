@@ -38,6 +38,7 @@ PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
 TARGET_UPDATE = 10000
 PRINT_STEP = 1000
+SELF_PLAY = True
 
 
 class DQN(nn.Module):
@@ -295,7 +296,8 @@ def state_numpy_to_tensor(state, device=device):
 def train_one_episode(env, game, color, device=device, batch_size=BATCH_SIZE, gamma=GAMMA, epsilon=None):
     """Perform the training on one episode."""
     game.get_agent(color).q_model.eval()
-    # game.get_agent(-color).q_model.eval()
+    if SELF_PLAY:
+        game.get_agent(-color).q_model.eval()
 
     state = env.reset()
     state = state_numpy_to_tensor(state)
@@ -409,10 +411,16 @@ if __name__ == "__main__":
     torch.manual_seed(0)
     random.seed(0)
 
-    game = OthelloGame(DQNAgent(env, 1, lr=LR), RandomAgent(-1))
-    # game.sync(1, -1)
+    if SELF_PLAY:
+        game = OthelloGame(DQNAgent(env, 1, lr=LR), DQNAgent(env, -1, lr=LR))
+        game.sync(1, -1)
+    else:
+        game = OthelloGame(DQNAgent(env, 1, lr=LR), RandomAgent(-1))
 
     color = 1
+    best_score_cons = 0.0  # Best score over 5 consecutive evaluations
+    num_cons_evals = 0
+    best_score = 0.0  # Best score overall
 
     for i in tqdm(range(200001)):
         train_one_episode(env, game, color)
@@ -421,24 +429,32 @@ if __name__ == "__main__":
         #     print(env.render())
         #     print(env.score())
 
-        # if i % NB_EPISODES_PER_AGENT == 0:
-        #     game.sync(color, -color)  # Update model for the other player
-        #     color *= -1
+        if SELF_PLAY and i % NB_EPISODES_PER_AGENT == 0:
+            game.sync(color, -color)  # Update model for the other player
+            color *= -1
 
         if i % PRINT_STEP == 0:
+            num_cons_evals += 1
+
             print("Scoring...")
-            num_success_white, max_cons_success, score, _ = score_multi_episode(
-                env, game, 1)
-            print("White ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
-                i, num_success_white, max_cons_success, score))
-            # num_success_black, max_cons_success, score, _ = score_multi_episode(
-            #     env, game, -1)
-            # print("Black ... Episode: {}, Number of wins: {}, Max number of consecutive wins: {}, Total score: {:.1f}".format(
-            #     i, num_success_black, max_cons_success, score))
-            writer.add_scalars(
-                'Performance',
-                {'White': num_success_white},
-                i)
-            torch.save(game.get_agent(color).q_model.state_dict(), PATH)
-            print("Model saved")
+            num_success_white, _, _, _ = score_multi_episode(env, game, 1)
+            print("White ... Episode: {}, Number of wins: {}".format(
+                i, num_success_white))
+            if SELF_PLAY:
+                num_success_black, _, _, _ = score_multi_episode(env, game, -1)
+                print("Black ... Episode: {}, Number of wins: {}".format(
+                    i, num_success_black))
+                score = (num_success_white + num_success_black) * 0.5
+            else:
+                score = num_success_white
+
+            if score >= best_score:
+                best_score = score
+                torch.save(game.get_agent(color).q_model.state_dict(), PATH)
+                print("Model saved")
+
+            best_score_cons = max(score, best_score_cons)
+            if num_cons_evals % 5 == 0:
+                writer.add_scalar('Score', best_score_cons)
+                best_score_cons = 0.0
     writer.close()
