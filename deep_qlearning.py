@@ -38,7 +38,7 @@ PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
 TARGET_UPDATE = 10000
 PRINT_STEP = 1000
-SELF_PLAY = False
+SELF_PLAY = True
 
 
 class DQN(nn.Module):
