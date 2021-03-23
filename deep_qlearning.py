@@ -21,7 +21,7 @@ from copy import deepcopy
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter(log_dir='runs_1')
-env = OthelloEnv(n=8)
+env = OthelloEnv(n=6)
 env.reset()
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -122,44 +122,75 @@ class DQNAgent:
             print(env.render())
             return None, 0
 
-    def draw_action_minimax(self, env, s, depth=MINIMAX_DEPTH):
+    def draw_action_minimax(self, env, s, depth=MINIMAX_DEPTH, alpha=np.NINF, beta=np.PINF):
         """Draw an action by combining DQN with minimax algorithm."""
-        if depth == 0:
-            return None, 1.0
+
+        maximizer = env.turn * self.color  # 1 if True, -1 if False
 
         s *= env.turn
         with torch.no_grad():
-            values = self.q_model(s).reshape(-1)
+            values = self.q_model(s).reshape(-1).cpu().numpy()
         valid_moves = env.get_valid_moves(env.turn)
-        value_moves = []
-        best_value = -1e9
-        best_action = None
-        if len(valid_moves) > 0:
-            for i, move in enumerate(valid_moves):
-                # print(env.render())
-                env_tmp = deepcopy(env)
+        if len(valid_moves) == 0:
+            return None, 0
+        valid_moves = np.array([env.coord2ind(m) for m in valid_moves])
 
-                value_moves.append(values[env.coord2ind(move)])
-                new_s, reward, done, info = env_tmp.step(move)
-                new_s = state_numpy_to_tensor(new_s)
-                if done:
-                    if reward * env.turn > 0:
-                        value_moves[-1] *= 1e7
-                    elif reward * env.turn < 0:
-                        value_moves[-1] *= -1e7
-                    else:
-                        value_moves[-1] *= 0
-                else:
-                    value_moves[-1] *= self.draw_action_minimax(
-                        env_tmp, new_s, depth=depth-1)[1]
-                if best_value < value_moves[-1]:
-                    best_value = value_moves[-1]
-                    best_action = valid_moves[i]
+        # print('depth', depth)
+        # print('maximizer: ', maximizer)
 
-        else:
-            return None, values[env.n * env.n] * (env.turn * self.color)
+        if depth == 1:
+            best_action = valid_moves[np.argsort(values[valid_moves])][-1]
+            best_value = values[best_action]
+            best_action = env.ind2coord(best_action)
+            
+            # actions = valid_moves[np.argsort(values[valid_moves])][-2:]
+            # values = values[actions]
+            # print(values)
+            # print(actions)
 
-        return best_action, best_value * (env.turn * self.color)
+            return best_action, best_value * maximizer
+
+        # Select 2 most possible actions
+        actions = valid_moves[np.argsort(values[valid_moves])][-2:]
+        values = values[actions]
+        # print(values)
+        # print(actions)
+
+        best_action = actions[-1]
+        best_value = values[-1]
+
+        for v, a in zip(values, actions):
+            env_ = deepcopy(env)
+            state, reward, done, info = env_.step(env.ind2coord(a))
+            s = state_numpy_to_tensor(state)
+            _, value = self.draw_action_minimax(env_, s,
+                                                depth=depth-1,
+                                                alpha=alpha, beta=beta)
+            if reward * self.color > 0:
+                value = np.PINF
+            elif reward * self.color < 0:
+                value = np.NINF
+            else:
+                continue
+
+            if maximizer > 0 and best_value <= value:
+                best_value = value
+                best_action = a
+                alpha = max(alpha, best_value)
+
+                if beta <= alpha:
+                    break
+            if maximizer < 0 and best_value >= value:
+                best_value = value
+                best_action = a
+                beta = min(beta, best_value)
+
+                if beta <= alpha:
+                    break
+
+        # print('Best_action ', best_action)
+
+        return env.ind2coord(best_action), best_value
 
     def update_target_model(self):
         """Copy state_dict of q_model to target_model."""
