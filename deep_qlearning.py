@@ -399,7 +399,7 @@ def score_multi_episode(env, game, color, depth=4, device='cpu',
 
     for i in range(num_episodes):
 
-        print(i)
+        # print(i)
         state = env.reset()
         state = state_numpy_to_tensor(state)
         done = False
