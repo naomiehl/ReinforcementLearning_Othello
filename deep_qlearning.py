@@ -20,7 +20,6 @@ import random
 from copy import deepcopy
 from torch.utils.tensorboard import SummaryWriter
 
-writer = SummaryWriter(log_dir='runs_2')
 env = OthelloEnv(n=8)
 env.reset()
 device = torch.device(
@@ -38,7 +37,7 @@ PATH = "dqn_state_dict.pt"
 NB_EPISODES_PER_AGENT = 1
 TARGET_UPDATE = 10000
 PRINT_STEP = 1000
-SELF_PLAY = True
+SELF_PLAY = False
 
 
 class DQN(nn.Module):
@@ -446,6 +445,7 @@ if __name__ == "__main__":
     torch.manual_seed(0)
     random.seed(0)
 
+    writer = SummaryWriter(log_dir='runs_2')
     if SELF_PLAY:
         game = OthelloGame(DQNAgent(env, 1, lr=LR), DQNAgent(env, -1, lr=LR))
         game.sync(1, -1)

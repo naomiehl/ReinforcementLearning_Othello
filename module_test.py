@@ -73,6 +73,6 @@ def score_multi_episode(env, game, color, depth=4, device='cpu',
     return num_success, max(num_cons_success), score, results
 
 st = time.time()
-s, _, _, _ = score_multi_episode(env, game, -1)
+s, _, _, _ = score_multi_episode(env, game, 1)
 print(time.time() - st)
 print(s)
