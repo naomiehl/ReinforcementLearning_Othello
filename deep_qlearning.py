@@ -21,7 +21,7 @@ from copy import deepcopy
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter(log_dir='runs_1')
-env = OthelloEnv(n=6)
+env = OthelloEnv(n=8)
 env.reset()
 device = torch.device(
     'cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -156,8 +156,11 @@ class DQNAgent:
         # print(values)
         # print(actions)
 
-        best_action = actions[-1]
-        best_value = values[-1]
+        best_action = None
+        if maximizer > 0:
+            best_value = np.NINF
+        else:
+            best_value = np.PINF
 
         for v, a in zip(values, actions):
             env_ = deepcopy(env)
@@ -170,8 +173,6 @@ class DQNAgent:
                 value = np.PINF
             elif reward * self.color < 0:
                 value = np.NINF
-            else:
-                continue
 
             if maximizer > 0 and best_value <= value:
                 best_value = value
@@ -385,8 +386,8 @@ def train_one_episode(env, game, color, device=device, batch_size=BATCH_SIZE, ga
         state = new_state
 
 
-def score_multi_episode(env, game, color, depth=MINIMAX_DEPTH, device=device,
-                        num_episodes=NUM_EPISODES_EVAL, epsilon=.0):
+def score_multi_episode(env, game, color, depth=4, device='cpu',
+                        num_episodes=100, epsilon=.0):
     """Evaluate the performance of the model over multiple games."""
     trained_agent = game.get_agent(color)
     eval_agent = RandomAgent(-color)
@@ -397,18 +398,21 @@ def score_multi_episode(env, game, color, depth=MINIMAX_DEPTH, device=device,
     score = .0
 
     for i in range(num_episodes):
+
+        print(i)
         state = env.reset()
         state = state_numpy_to_tensor(state)
         done = False
-        alpha = 0.
-        # alpha_incre = 1.0 / (env.n * env.n - 4)
+        mu = 1.0
+        mu_incre = 0.0
         # No use of minimax
         while not done:
             # print(env.render())
             if env.turn == color:
-                if np.random.rand() < alpha:
+                if np.random.rand() < mu:
                     action, value = trained_agent.draw_action_minimax(
                         env, state, depth)
+                    # print("minimax...")
                 else:
                     action, value = trained_agent.draw_action(
                         env, state, epsilon)
@@ -420,7 +424,7 @@ def score_multi_episode(env, game, color, depth=MINIMAX_DEPTH, device=device,
             else:
                 done = env.score() is not None and env.turn_passed
                 env.turn *= -1
-
+            mu += mu_incre
             # alpha += alpha_incre
 
         # print(env.render())
