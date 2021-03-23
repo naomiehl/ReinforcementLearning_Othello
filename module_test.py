@@ -35,7 +35,7 @@ def score_multi_episode(env, game, color, depth=4, device='cpu',
         state = env.reset()
         state = state_numpy_to_tensor(state)
         done = False
-        mu = 1.0
+        mu = 0.0
         mu_incre = 0.0
         # No use of minimax
         while not done:

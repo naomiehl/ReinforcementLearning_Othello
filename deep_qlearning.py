@@ -20,7 +20,7 @@ import random
 from copy import deepcopy
 from torch.utils.tensorboard import SummaryWriter
 
-writer = SummaryWriter(log_dir='runs_1')
+writer = SummaryWriter(log_dir='runs_2')
 env = OthelloEnv(n=8)
 env.reset()
 device = torch.device(
