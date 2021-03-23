@@ -490,6 +490,6 @@ if __name__ == "__main__":
 
             best_score_cons = max(score, best_score_cons)
             if num_cons_evals % 5 == 0:
-                writer.add_scalar('Score', best_score_cons)
+                writer.add_scalar('Score', best_score_cons, i)
                 best_score_cons = 0.0
     writer.close()
