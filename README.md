@@ -5,7 +5,7 @@ This project was created for INF581 Advanced Machine Learning and Autonomous Age
 
 # How to Run
 
-![](Othello GUI.gif)
+![](OthelloGUI.gif)
 
 For the purpose of our work, we developed an environment as well as a GUI (Graphical User Interface) to play against an agent in a real Othello setting. 
 Please run the file othello_gui.py located in the othello-gui folder using python in the command line. You can execute the following command from the root directory:
